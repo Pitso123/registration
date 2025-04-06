@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Home | Student Consultation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: url("{% static 'images/student_pic.jpg' %}") no-repeat center center/cover;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 10px;
+    }
+    h1 {
+      font-size: 40px;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;  /* Original size from your index page */
+      background-color: #ffffff;  /* White like login button */
+      color: #080710;  /* Dark text like login button */
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+      border: none;
+      cursor: pointer;
+      /* These dimensions match your original Get Started button */
+      width: auto;  /* Not full width like login */
+      display: inline-block;  /* Not block like login */
+      text-align: center;
+    }
+    
+    .btn:hover {
+      background-color: rgba(255, 255, 255, 0.9);  /* Slight hover effect */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Student Consultation</h1>
+    <p>Your academic and wellness companion.</p>
+    <a href="{% url 'signup' %}" class="btn">Get Started</a>
+  </div>
+</body>
+</html>

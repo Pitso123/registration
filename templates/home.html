@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Consultation Schedule</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .container-main {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        .page-title {
+            background-color: #343a40;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .no-consultations {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+            display: none;
+        }
+        
+        .no-consultations i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+        
+        #successAlert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
+            min-width: 300px;
+        }
+
+        .btn-custom-dark {
+            background-color: #343a40;
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom-dark:hover {
+            background-color: #23272b;
+            transform: translateY(-1px);
+        }
+
+        .table thead th {
+            background-color: #343a40;
+            color: white;
+            border-color: #454d55;
+        }
+
+        .btn-warning {
+            color: #212529;
+        }
+        
+        .available-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .list-group-item {
+            border-color: #dee2e6;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Success Alert -->
+    <div id="successAlert" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span id="successMessage"></span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="container container-main">
+        <!-- Removed the icons from the heading -->
+        <h1 class="page-title">Student Consultation</h1>
+        
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <div>
+                <button class="btn btn-custom-dark" data-toggle="modal" data-target="#addClassModal">
+                    <i class="fas fa-plus mr-2"></i> Book Consultation
+                </button>
+                <button class="btn btn-custom-dark ml-2" data-toggle="modal" data-target="#availableConsultationModal">
+                    <i class="fas fa-users mr-2"></i> Available Consultation
+                </button>
+            </div>
+        </div>
+        
+        <!-- Rest of your code remains exactly the same -->
+        <table class="table table-bordered text-center" id="scheduleTable">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Course Name</th>
+                    <th>Instructor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Discussion</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+        
+        <div class="no-consultations" id="noConsultations">
+            <i class="fas fa-calendar-times"></i>
+            <h4>No consultations found</h4>
+            <p>Add your first consultation with a lecture using the button above</p>
+        </div>
+        
+        <div class="text-right mt-4">
+            <a href="{% url 'index' %}" class="btn btn-custom-dark">Logout</a>
+        </div>
+    </div>
+
+    <!-- Add/Edit Consultation Modal -->
+    <div class="modal fade" id="addClassModal" tabindex="-1" role="dialog" aria-labelledby="addClassModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="addClassModalLabel">Add/Edit Consultation</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="classForm">
+                        <div class="form-group">
+                            <label>Course Name</label>
+                            <input type="text" id="courseName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Instructor</label>
+                            <input type="text" id="instructor" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="consultationDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="time" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Discussion</label>
+                            <textarea id="discussion" class="form-control" rows="3"></textarea>
+                        </div>
+                        <input type="hidden" id="editingRowIndex" value="-1">
+                        <button type="submit" class="btn btn-custom-dark btn-block">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Available Consultation Modal -->
+    <div class="modal fade" id="availableConsultationModal" tabindex="-1" role="dialog" aria-labelledby="availableConsultationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="availableConsultationModalLabel">Available Lecturers & Advisors</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-dark"><i class="fas fa-chalkboard-teacher mr-2"></i>Lecturers</h5>
+                            <ul class="list-group available-list">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Ms. Eva Mamabolo (Diploma in ICT)
+                                    <span class="badge badge-success">Available</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Dr. Benedict Khoboli (B.ed)
+                                    <span class="badge badge-success">Available</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Prof. Gilbert Pwiti (Bachelor of Arts)
+                                    <span class="badge badge-danger">Unavailable</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Mr. Kaelo Koos (Economics)
+                                    <span class="badge badge-danger">Unavailable</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Dr. Davis (Biology)
+                                    <span class="badge badge-success">Available</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-dark"><i class="fas fa-user-tie mr-2"></i>Academic Advisors</h5>
+                            <ul class="list-group available-list">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Ms. Sesane(Nas)
+                                    <span class="badge badge-success">Available</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Mr. Thompson (Engineering)
+                                    <span class="badge badge-success">Available</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Dr. Martinez (Arts & Humanities)
+                                    <span class="badge badge-success">Available</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Prof. Wilson (Business)
+                                    <span class="badge badge-danger">Unavailable</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-custom-dark" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Optional JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            loadConsultations();
+            
+            $("#classForm").submit(function(event) {
+                event.preventDefault();
+                const consultation = {
+                    courseName: $("#courseName").val(),
+                    instructor: $("#instructor").val(),
+                    date: $("#consultationDate").val(),
+                    time: $("#time").val(),
+                    discussion: $("#discussion").val()
+                };
+                
+                const editingIndex = $("#editingRowIndex").val();
+                let consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                
+                if (editingIndex === "-1") {
+                    consultations.push(consultation);
+                    showSuccessMessage(`You've successfully set a consultation with ${consultation.instructor}`);
+                } else {
+                    consultations[editingIndex] = consultation;
+                    showSuccessMessage(`You've successfully updated consultation with ${consultation.instructor}`);
+                }
+                
+                localStorage.setItem('consultations', JSON.stringify(consultations));
+                loadConsultations();
+                
+                $("#classForm")[0].reset();
+                $("#editingRowIndex").val("-1");
+                $("#addClassModal").modal("hide");
+            });
+            
+            function showSuccessMessage(message) {
+                $("#successMessage").text(message);
+                $("#successAlert").fadeIn();
+                
+                setTimeout(function() {
+                    $("#successAlert").fadeOut();
+                }, 5000);
+            }
+            
+            $(document).on("click", ".edit", function() {
+                const row = $(this).closest("tr");
+                const index = row.index();
+                const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                
+                if (consultations[index]) {
+                    $("#courseName").val(consultations[index].courseName);
+                    $("#instructor").val(consultations[index].instructor);
+                    $("#consultationDate").val(consultations[index].date);
+                    $("#time").val(consultations[index].time);
+                    $("#discussion").val(consultations[index].discussion);
+                    $("#editingRowIndex").val(index);
+                    $("#addClassModal").modal("show");
+                }
+            });
+            
+            $(document).on("click", ".delete", function() {
+                if (confirm("Are you sure you want to delete this consultation?")) {
+                    const index = $(this).closest("tr").index();
+                    let consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                    
+                    const instructorName = consultations[index].instructor;
+                    
+                    consultations.splice(index, 1);
+                    localStorage.setItem('consultations', JSON.stringify(consultations));
+                    loadConsultations();
+                    
+                    showSuccessMessage(`You've deleted consultation with ${instructorName}`);
+                }
+            });
+
+            function loadConsultations() {
+                const consultations = JSON.parse(localStorage.getItem('consultations') || '[]');
+                const tbody = $("#scheduleTable tbody");
+                tbody.empty();
+                
+                if (consultations.length === 0) {
+                    $("#noConsultations").show();
+                    return;
+                } else {
+                    $("#noConsultations").hide();
+                }
+
+                consultations.forEach((consultation, index) => {
+                    tbody.append(`<tr>
+                        <td>${consultation.courseName}</td>
+                        <td>${consultation.instructor}</td>
+                        <td>${consultation.date}</td>
+                        <td>${consultation.time}</td>
+                        <td>${consultation.discussion}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
